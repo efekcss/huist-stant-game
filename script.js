@@ -1,0 +1,247 @@
+/**
+ * HÜİST Stant Oyunu - Ana Motor
+ */
+
+const GAME_CONFIG = {
+    QUESTIONS_PER_SESSION: 5,   // Her oyunda sorulacak soru sayısı
+    WIN_THRESHOLD: 3,           // Çark çevirmek için gereken minimum doğru sayısı
+    QUESTION_TIMEOUT_SEC: 60,   // Soru başına verilen süre (saniye)
+    ENABLE_WHEEL: true,         // Çark modülü aktif mi?
+    FEEDBACK_DELAY_MS: 2000,    // Cevap sonrası bekleme süresi (milisaniye)
+    IDLE_TIMEOUT_SEC: 120       // Ekran boşta kalırsa başa dönme süresi (saniye)
+};
+
+const GameApp = {
+    state: {
+        questions: [],
+        currentIndex: 0,
+        score: 0,
+        timeLeft: 0,
+        timerInterval: null,
+        idleTimeout: null,
+        isLocked: false
+    },
+
+    init() {
+        // Boşta kalma (idle) sayacını başlat
+        this.resetIdleTimer();
+        document.addEventListener('click', () => this.resetIdleTimer());
+        document.addEventListener('touchstart', () => this.resetIdleTimer());
+
+        // Çarkı hazırla (eğer aktifse)
+        if (GAME_CONFIG.ENABLE_WHEEL && window.WheelModule) {
+            window.WheelModule.init('wheelCanvas', (prize) => {
+                this.onWheelStop(prize);
+            });
+        }
+    },
+
+    resetIdleTimer() {
+        clearTimeout(this.state.idleTimeout);
+        this.state.idleTimeout = setTimeout(() => {
+            this.resetToMenu();
+        }, GAME_CONFIG.IDLE_TIMEOUT_SEC * 1000);
+    },
+
+    showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    },
+
+    resetToMenu() {
+        this.clearTimers();
+        this.showScreen('screen-menu');
+        // Çark ekranını da sıfırla
+        document.getElementById('prizeResult').innerText = '';
+        document.getElementById('btnSpin').style.display = 'inline-block';
+        document.getElementById('btnFinish').style.display = 'none';
+        if (window.WheelModule) {
+             // Reset canvas state if needed (just visual)
+             window.WheelModule.currentAngle = 0;
+             window.WheelModule.draw();
+        }
+    },
+
+    clearTimers() {
+        clearInterval(this.state.timerInterval);
+    },
+
+    shuffleArray(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    },
+
+    startGame() {
+        if (!window.QUESTIONS || window.QUESTIONS.length === 0) {
+            alert("Soru havuzu bulunamadı!");
+            return;
+        }
+
+        // Soruları karıştır ve seç
+        const shuffled = this.shuffleArray(window.QUESTIONS);
+        this.state.questions = shuffled.slice(0, GAME_CONFIG.QUESTIONS_PER_SESSION);
+        
+        // Eğer havuzda yeterli soru yoksa olanları kullan
+        if (this.state.questions.length === 0) return;
+
+        this.state.currentIndex = 0;
+        this.state.score = 0;
+        
+        this.showScreen('screen-game');
+        this.loadQuestion();
+    },
+
+    loadQuestion() {
+        this.state.isLocked = false;
+        
+        // UI Sıfırlama
+        const feedbackBox = document.getElementById('feedbackBox');
+        feedbackBox.classList.remove('show');
+        feedbackBox.innerText = '';
+        feedbackBox.style.color = 'inherit';
+        
+        document.getElementById('btnTrue').disabled = false;
+        document.getElementById('btnFalse').disabled = false;
+
+        const q = this.state.questions[this.state.currentIndex];
+        document.getElementById('questionText').innerText = q.question;
+
+        this.startTimer();
+    },
+
+    startTimer() {
+        this.clearTimers();
+        this.state.timeLeft = GAME_CONFIG.QUESTION_TIMEOUT_SEC;
+        this.updateTimerUI();
+
+        this.state.timerInterval = setInterval(() => {
+            this.state.timeLeft--;
+            this.updateTimerUI();
+
+            if (this.state.timeLeft <= 0) {
+                this.clearTimers();
+                this.handleTimeout();
+            }
+        }, 1000);
+    },
+
+    updateTimerUI() {
+        const percentage = (this.state.timeLeft / GAME_CONFIG.QUESTION_TIMEOUT_SEC) * 100;
+        const timerBar = document.getElementById('timerBar');
+        
+        timerBar.style.width = percentage + '%';
+        document.getElementById('timerText').innerText = `Kalan Süre: ${this.state.timeLeft}s`;
+
+        if (this.state.timeLeft <= 10) {
+            timerBar.classList.add('warning');
+        } else {
+            timerBar.classList.remove('warning');
+        }
+    },
+
+    handleTimeout() {
+        if (this.state.isLocked) return;
+        this.state.isLocked = true;
+        
+        document.getElementById('btnTrue').disabled = true;
+        document.getElementById('btnFalse').disabled = true;
+
+        this.showFeedback(false, "Süre Doldu! (Otomatik Yanlış)");
+    },
+
+    handleAnswer(userAnswer) {
+        if (this.state.isLocked) return;
+        this.state.isLocked = true;
+        this.clearTimers();
+
+        document.getElementById('btnTrue').disabled = true;
+        document.getElementById('btnFalse').disabled = true;
+
+        const currentQ = this.state.questions[this.state.currentIndex];
+        const isCorrect = (userAnswer === currentQ.isTrue);
+
+        if (isCorrect) {
+            this.state.score++;
+        }
+
+        this.showFeedback(isCorrect, currentQ.fact);
+    },
+
+    showFeedback(isCorrect, factText) {
+        const feedbackBox = document.getElementById('feedbackBox');
+        feedbackBox.classList.add('show');
+        
+        const title = isCorrect ? "✅ DOĞRU!" : "❌ YANLIŞ!";
+        feedbackBox.style.color = isCorrect ? "var(--btn-true)" : "var(--btn-false)";
+        
+        feedbackBox.innerHTML = `<strong>${title}</strong><br><span style="color:white; font-size:1.1rem;">${factText || ''}</span>`;
+
+        setTimeout(() => {
+            this.nextQuestion();
+        }, GAME_CONFIG.FEEDBACK_DELAY_MS);
+    },
+
+    nextQuestion() {
+        this.state.currentIndex++;
+        
+        if (this.state.currentIndex >= this.state.questions.length) {
+            this.endGame();
+        } else {
+            this.loadQuestion();
+        }
+    },
+
+    endGame() {
+        this.showScreen('screen-result');
+        
+        const total = this.state.questions.length;
+        const isSuccess = this.state.score >= GAME_CONFIG.WIN_THRESHOLD;
+        
+        document.getElementById('resultTitle').innerText = isSuccess ? "Tebrikler! 🎉" : "Oyun Bitti!";
+        document.getElementById('resultScore').innerText = `${total} sorudan ${this.state.score} tanesini doğru bildin.`;
+
+        const actionContainer = document.getElementById('resultActionContainer');
+        actionContainer.innerHTML = ''; // Temizle
+
+        if (isSuccess) {
+            if (GAME_CONFIG.ENABLE_WHEEL && window.WheelModule) {
+                const btn = document.createElement('button');
+                btn.className = 'btn-primary';
+                btn.innerText = '🎁 Çarkı Çevir!';
+                btn.onclick = () => this.showScreen('screen-wheel');
+                actionContainer.appendChild(btn);
+            } else {
+                actionContainer.innerHTML = `
+                    <p style="color:var(--btn-true); font-weight:bold;">Ödülünü stant görevlisinden alabilirsin!</p>
+                    <button class="btn-primary" onclick="GameApp.resetToMenu()">Tamamla</button>
+                `;
+            }
+        } else {
+            const btn = document.createElement('button');
+            btn.className = 'btn-primary';
+            btn.innerText = '🔄 Tekrar Dene';
+            btn.onclick = () => this.resetToMenu();
+            actionContainer.appendChild(btn);
+        }
+    },
+
+    spinWheel() {
+        document.getElementById('btnSpin').style.display = 'none';
+        document.getElementById('prizeResult').innerText = 'Çark dönüyor...';
+        window.WheelModule.spin();
+    },
+
+    onWheelStop(prize) {
+        document.getElementById('prizeResult').innerHTML = `Kazandın:<br><strong>${prize}</strong>`;
+        document.getElementById('btnFinish').style.display = 'inline-block';
+    }
+};
+
+// Sayfa yüklendiğinde başlat
+window.addEventListener('DOMContentLoaded', () => {
+    GameApp.init();
+});
