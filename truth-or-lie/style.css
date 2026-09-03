@@ -1,10 +1,13 @@
-/* Genel Kiosk Ayarları */
+/* Genel Kiosk Ayarları & Arka Plan */
 :root {
-  --primary-color: #0b1a2a; /* Hacettepe laciverti benzeri karanlık ton */
-  --accent-color: #f39c12;
-  --text-color: #fdfdfd;
-  --btn-true: #27ae60;
-  --btn-false: #c0392b;
+  --primary-bg: #000000; 
+  --hacettepe-mor: #4a148c;
+  --koyu-mor: #2a0845;
+  --eflatun: #b39ddb;
+  --text-color: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --btn-glass: rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -15,20 +18,51 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--primary-color);
+  background-color: var(--primary-bg);
   color: var(--text-color);
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   overflow: hidden;
+  position: relative;
+  
   /* Kiosk mod korumaları */
-  user-select: none; /* Metin seçimi engellendi */
+  user-select: none;
   -webkit-user-select: none;
-  touch-action: manipulation; /* Çift tık zoom engellendi */
+  touch-action: manipulation;
 }
 
-/* Ekran Geçişleri */
+/* Siyah ve Morlu Hareketli Bubble Yapısı (Yumuşak Gradient) */
+.bg-bubbles {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: -1;
+  background: radial-gradient(circle at 10% 20%, rgba(74, 20, 140, 0.4) 0%, transparent 40%),
+              radial-gradient(circle at 80% 80%, rgba(42, 8, 69, 0.6) 0%, transparent 50%),
+              radial-gradient(circle at 50% 50%, rgba(179, 157, 219, 0.15) 0%, transparent 60%),
+              #000000;
+  animation: bgPulse 20s infinite alternate ease-in-out;
+}
+
+@keyframes bgPulse {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+/* Kutuya (Screen) Uygulanan Flash Efektleri */
+.screen.flash-success {
+  background: rgba(46, 204, 113, 0.15);
+  border-color: rgba(46, 204, 113, 0.5);
+  box-shadow: 0 0 50px rgba(46, 204, 113, 0.4);
+}
+.screen.flash-error {
+  background: rgba(231, 76, 60, 0.15);
+  border-color: rgba(231, 76, 60, 0.5);
+  box-shadow: 0 0 50px rgba(231, 76, 60, 0.4);
+}
+
+/* Ekran Geçişleri ve Glassmorphism */
 .screen {
   display: none;
   flex-direction: column;
@@ -37,6 +71,17 @@ body {
   width: 90%;
   max-width: 900px;
   text-align: center;
+  
+  background: var(--glass-bg);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+  z-index: 100;
+  
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
   animation: fadeIn 0.3s ease-in-out;
 }
 
@@ -55,7 +100,7 @@ body {
   top: 20px;
   right: 20px;
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255,255,255,0.3);
+  border: 1px solid rgba(255,255,255,0.2);
   color: #fff;
   padding: 8px 15px;
   border-radius: 20px;
@@ -63,41 +108,55 @@ body {
   font-size: 14px;
   z-index: 1000;
   transition: 0.2s;
+  backdrop-filter: blur(10px);
 }
 
 .mod-reset-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* Tipografi & Bileşenler */
+/* Ana Menü Logo */
+.main-logo {
+  max-width: 250px;
+  height: auto;
+  margin-bottom: 25px;
+  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); /* PNG için şeffaflığı destekleyen gölge */
+}
+
+/* Tipografi - Eski Haline Döndü, Sadece Beyaz */
 h1 {
   font-size: 3rem;
   margin-bottom: 20px;
-  color: var(--accent-color);
+  color: #ffffff;
 }
 
 h2 {
   font-size: 2.5rem;
   margin-bottom: 30px;
   line-height: 1.3;
+  color: #ffffff;
 }
 
 p {
   font-size: 1.5rem;
   margin-bottom: 20px;
+  color: #ffffff;
 }
 
-/* Butonlar */
+/* Glass Efektli Butonlar */
 button {
   font-family: inherit;
   font-size: 1.8rem;
   padding: 15px 40px;
   margin: 10px;
-  border: none;
+  border: 1px solid rgba(255,255,255,0.3);
   border-radius: 12px;
   cursor: pointer;
-  transition: transform 0.1s, opacity 0.2s;
   font-weight: bold;
+  transition: all 0.2s;
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 button:active {
@@ -105,25 +164,42 @@ button:active {
 }
 
 button:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
+/* Ana Buton */
 .btn-primary {
-  background-color: var(--accent-color);
-  color: #fff;
+  background: rgba(179, 157, 219, 0.2); /* Eflatun saydam */
+  box-shadow: 0 4px 15px rgba(179, 157, 219, 0.2);
+}
+.btn-primary:hover {
+  background: rgba(179, 157, 219, 0.4);
+  box-shadow: 0 4px 20px rgba(179, 157, 219, 0.4);
 }
 
+/* Gerçek / Yalan Butonları - Glassmorphism UX */
 .btn-true {
-  background-color: var(--btn-true);
-  color: #fff;
-  width: 200px;
+  background: rgba(46, 204, 113, 0.2);
+  border: 1px solid rgba(46, 204, 113, 0.5);
+  box-shadow: 0 4px 15px rgba(46, 204, 113, 0.1);
+  width: 250px;
+}
+.btn-true:hover {
+  background: rgba(46, 204, 113, 0.4);
+  box-shadow: 0 4px 20px rgba(46, 204, 113, 0.3);
 }
 
 .btn-false {
-  background-color: var(--btn-false);
-  color: #fff;
-  width: 200px;
+  background: rgba(231, 76, 60, 0.2);
+  border: 1px solid rgba(231, 76, 60, 0.5);
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.1);
+  width: 250px;
+}
+.btn-false:hover {
+  background: rgba(231, 76, 60, 0.4);
+  box-shadow: 0 4px 20px rgba(231, 76, 60, 0.3);
 }
 
 .btn-container {
@@ -133,7 +209,7 @@ button:disabled {
   margin-top: 30px;
 }
 
-/* Sayaç Çubuğu (Progress Bar) */
+/* Süre Sayacı */
 .timer-container {
   width: 100%;
   height: 20px;
@@ -147,21 +223,28 @@ button:disabled {
 .timer-bar {
   height: 100%;
   width: 100%;
-  background-color: var(--btn-true);
-  transition: width 1s linear, background-color 0.3s;
+  background: linear-gradient(90deg, #e74c3c 0%, #f1c40f 50%, #2ecc71 100%);
+  transition: width 1s linear;
+  border-radius: 10px;
 }
 
-.timer-bar.warning {
-  background-color: var(--btn-false);
+.danger-pulse {
+  animation: pulseWarning 1s infinite alternate;
+}
+
+@keyframes pulseWarning {
+  from { opacity: 1; filter: brightness(1); }
+  to { opacity: 0.6; filter: brightness(1.5); }
 }
 
 .timer-text {
   font-size: 1.2rem;
   margin-bottom: 5px;
   font-weight: bold;
+  color: #ffffff;
 }
 
-/* Geri Bildirim (Fact) Alanı */
+/* Geri Bildirim Kutusu */
 .feedback-box {
   margin-top: 30px;
   padding: 20px;
@@ -170,7 +253,13 @@ button:disabled {
   min-height: 80px;
   opacity: 0;
   transition: opacity 0.3s;
-  background: rgba(0,0,0,0.3);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  backdrop-filter: blur(10px);
 }
 
 .feedback-box.show {
@@ -180,9 +269,11 @@ button:disabled {
 /* Çark Alanı */
 #wheelContainer {
   margin: 20px 0;
+  position: relative;
+  display: inline-block;
 }
 
-canvas {
+#wheelCanvas {
   max-width: 100%;
   border-radius: 50%;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
@@ -190,7 +281,7 @@ canvas {
 
 .prize-result {
   font-size: 2rem;
-  color: var(--accent-color);
+  color: #ffffff;
   margin-top: 20px;
   min-height: 40px;
 }

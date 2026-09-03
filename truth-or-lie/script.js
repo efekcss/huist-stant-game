@@ -50,13 +50,13 @@ const GameApp = {
 
     resetToMenu() {
         this.clearTimers();
+        if(window.Confetti) window.Confetti.stop();
         this.showScreen('screen-menu');
         // Çark ekranını da sıfırla
         document.getElementById('prizeResult').innerText = '';
         document.getElementById('btnSpin').style.display = 'inline-block';
         document.getElementById('btnFinish').style.display = 'none';
         if (window.WheelModule) {
-             // Reset canvas state if needed (just visual)
              window.WheelModule.currentAngle = 0;
              window.WheelModule.draw();
         }
@@ -85,7 +85,6 @@ const GameApp = {
         const shuffled = this.shuffleArray(window.QUESTIONS);
         this.state.questions = shuffled.slice(0, GAME_CONFIG.QUESTIONS_PER_SESSION);
         
-        // Eğer havuzda yeterli soru yoksa olanları kullan
         if (this.state.questions.length === 0) return;
 
         this.state.currentIndex = 0;
@@ -101,11 +100,15 @@ const GameApp = {
         // UI Sıfırlama
         const feedbackBox = document.getElementById('feedbackBox');
         feedbackBox.classList.remove('show');
-        feedbackBox.innerText = '';
+        document.getElementById('feedbackContent').innerHTML = '';
+        document.getElementById('btnNextQuestion').style.display = 'none';
         feedbackBox.style.color = 'inherit';
         
         document.getElementById('btnTrue').disabled = false;
         document.getElementById('btnFalse').disabled = false;
+        
+        // Flash temizle
+        document.getElementById('screen-game').classList.remove('flash-success', 'flash-error');
 
         const q = this.state.questions[this.state.currentIndex];
         document.getElementById('questionText').innerText = q.question;
@@ -137,9 +140,9 @@ const GameApp = {
         document.getElementById('timerText').innerText = `Kalan Süre: ${this.state.timeLeft}s`;
 
         if (this.state.timeLeft <= 10) {
-            timerBar.classList.add('warning');
+            timerBar.classList.add('danger-pulse');
         } else {
-            timerBar.classList.remove('warning');
+            timerBar.classList.remove('danger-pulse');
         }
     },
 
@@ -149,7 +152,9 @@ const GameApp = {
         
         document.getElementById('btnTrue').disabled = true;
         document.getElementById('btnFalse').disabled = true;
-
+        document.getElementById('timerBar').classList.remove('danger-pulse');
+        
+        this.triggerFlash('screen-game', 'flash-error');
         this.showFeedback(false, "Süre Doldu! (Otomatik Yanlış)");
     },
 
@@ -160,15 +165,24 @@ const GameApp = {
 
         document.getElementById('btnTrue').disabled = true;
         document.getElementById('btnFalse').disabled = true;
+        document.getElementById('timerBar').classList.remove('danger-pulse');
 
         const currentQ = this.state.questions[this.state.currentIndex];
         const isCorrect = (userAnswer === currentQ.isTrue);
 
         if (isCorrect) {
             this.state.score++;
+            this.triggerFlash('screen-game', 'flash-success');
+        } else {
+            this.triggerFlash('screen-game', 'flash-error');
         }
 
         this.showFeedback(isCorrect, currentQ.fact);
+    },
+
+    triggerFlash(screenId, className) {
+        const screen = document.getElementById(screenId);
+        screen.classList.add(className);
     },
 
     showFeedback(isCorrect, factText) {
@@ -178,11 +192,8 @@ const GameApp = {
         const title = isCorrect ? "✅ DOĞRU!" : "❌ YANLIŞ!";
         feedbackBox.style.color = isCorrect ? "var(--btn-true)" : "var(--btn-false)";
         
-        feedbackBox.innerHTML = `<strong>${title}</strong><br><span style="color:white; font-size:1.1rem;">${factText || ''}</span>`;
-
-        setTimeout(() => {
-            this.nextQuestion();
-        }, GAME_CONFIG.FEEDBACK_DELAY_MS);
+        document.getElementById('feedbackContent').innerHTML = `<strong>${title}</strong><br><span style="color:var(--text-color); font-size:1.1rem; opacity:0.9;">${factText || ''}</span>`;
+        document.getElementById('btnNextQuestion').style.display = 'inline-block';
     },
 
     nextQuestion() {
@@ -204,15 +215,25 @@ const GameApp = {
         document.getElementById('resultTitle').innerText = isSuccess ? "Tebrikler! 🎉" : "Oyun Bitti!";
         document.getElementById('resultScore').innerText = `${total} sorudan ${this.state.score} tanesini doğru bildin.`;
 
+        // Sonuç ekranına genel flaş efekti uygula
+        const resultScreen = document.getElementById('screen-result');
+        resultScreen.classList.remove('flash-success', 'flash-error'); // Temizle
+        this.triggerFlash('screen-result', isSuccess ? 'flash-success' : 'flash-error');
+
         const actionContainer = document.getElementById('resultActionContainer');
         actionContainer.innerHTML = ''; // Temizle
 
         if (isSuccess) {
+            if(window.Confetti) window.Confetti.start(4000); // Başarı ekranında kısa konfeti
+            
             if (GAME_CONFIG.ENABLE_WHEEL && window.WheelModule) {
                 const btn = document.createElement('button');
                 btn.className = 'btn-primary';
                 btn.innerText = '🎁 Çarkı Çevir!';
-                btn.onclick = () => this.showScreen('screen-wheel');
+                btn.onclick = () => {
+                    if(window.Confetti) window.Confetti.stop();
+                    this.showScreen('screen-wheel');
+                };
                 actionContainer.appendChild(btn);
             } else {
                 actionContainer.innerHTML = `
@@ -223,7 +244,7 @@ const GameApp = {
         } else {
             const btn = document.createElement('button');
             btn.className = 'btn-primary';
-            btn.innerText = '🔄 Tekrar Dene';
+            btn.innerText = '🏠 Ana Menü';
             btn.onclick = () => this.resetToMenu();
             actionContainer.appendChild(btn);
         }
@@ -236,8 +257,16 @@ const GameApp = {
     },
 
     onWheelStop(prize) {
-        document.getElementById('prizeResult').innerHTML = `Kazandın:<br><strong>${prize}</strong>`;
+        if (prize === "Kazanamadın") {
+            document.getElementById('prizeResult').innerHTML = `<strong>Maalesef, ${prize} 😢</strong>`;
+        } else {
+            document.getElementById('prizeResult').innerHTML = `<strong>Tebrikler, ${prize} kazandın! 🎁</strong>`;
+        }
         document.getElementById('btnFinish').style.display = 'inline-block';
+        
+        if (prize !== "Kazanamadın" && window.Confetti) {
+            window.Confetti.start(0); // Sonsuz konfeti, baştan başla deyinceye kadar
+        }
     }
 };
 

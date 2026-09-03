@@ -3,8 +3,20 @@
 
 const WheelModule = {
   canvasId: 'wheelCanvas',
-  prizes: ["HÜİST Rozet", "Tekrar Dene", "Kahve Kuponu", "Sticker", "Anahtarlık", "Küçük Not Defteri"],
-  colors: ["#2c3e50", "#e74c3c", "#34495e", "#27ae60", "#2980b9", "#f39c12"],
+  prizes: [
+    "1. Hediye", "Kazanamadın", 
+    "2. Hediye", "Kazanamadın", 
+    "3. Hediye", "Kazanamadın", 
+    "4. Hediye", "Kazanamadın", 
+    "5. Hediye", "Kazanamadın"
+  ],
+  colors: [
+    "#2ecc71", "#e74c3c", 
+    "#3498db", "#e74c3c", 
+    "#9b59b6", "#e74c3c", 
+    "#f1c40f", "#e74c3c", 
+    "#e67e22", "#e74c3c"
+  ],
   isSpinning: false,
   currentAngle: 0,
   spinTimeout: null,
@@ -39,13 +51,13 @@ const WheelModule = {
       ctx.save();
       
       // Metni yaz
-      ctx.translate(centerX + Math.cos(angle + arc / 2) * radius / 1.7, 
-                    centerY + Math.sin(angle + arc / 2) * radius / 1.7);
-      ctx.rotate(angle + arc / 2 + Math.PI / 2);
+      ctx.translate(centerX, centerY);
+      ctx.rotate(angle + arc / 2);
       ctx.fillStyle = "white";
-      ctx.font = "bold 16px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(this.prizes[i], 0, 0);
+      ctx.font = "bold 22px sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.fillText(this.prizes[i], radius - 20, 0);
       ctx.restore();
     }
 
