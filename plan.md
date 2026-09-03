@@ -12,22 +12,23 @@ Bu proje, Hacettepe Üniversitesi İstatistik ve Veri Bilimi Topluluğu (HÜİST
 CORS hatasını önlemek ve internet gereksinimini sıfırlamak için JSON yerine doğrudan `.js` veri dosyaları ve modüler bir yapı kullanılacaktır.
 
 ```text
-/huist-oyunlar
+/huist-stant-game
 │
-├── index.html              # Kiosk SPA iskeleti (Menü, Oyun Ekranı, Sonuç Ekranı)
-├── style.css               # Kiosk CSS (Büyük butonlar, karanlık tema, touch ve seçim kilitleri)
-├── script.js               # Ana oyun motoru, soru akışı, zamanlayıcı ve moderatör kontrolleri
+├── /truth-or-lie/              # 1. Oyun (Gerçek mi Yalan mı?)
+│   ├── index.html              # Kiosk SPA iskeleti (Menü, Oyun Ekranı, Sonuç Ekranı)
+│   ├── style.css               # Kiosk CSS (Büyük butonlar, karanlık tema, touch ve seçim kilitleri)
+│   ├── script.js               # Ana oyun motoru, soru akışı, zamanlayıcı ve moderatör kontrolleri
+│   ├── /data
+│   │   └── questions.js        # window.QUESTIONS havuzu (40+ soru içerecek JS formatı)
+│   ├── /components
+│   │   └── wheel.js            # Modüler / Bağımsız Çark Modülü
+│   └── /assets
+│       ├── /img                
+│       ├── /fonts              
+│       └── /audio              
 │
-├── /data
-│   └── questions.js        # window.QUESTIONS havuzu (40+ soru içerecek JS formatı)
-│
-├── /components
-│   └── wheel.js            # Modüler / Bağımsız Çark Modülü (İstenirse tek tuşla/konfigle devreden çıkarılabilir)
-│
-└── /assets
-    ├── /img                # Logolar ve görseller
-    ├── /fonts              # Offline font dosyaları
-    └── /audio              # Doğru/yanlış/zafer ses efektleri (opsiyonel)
+└── /ai-or-real/                # 2. Oyun (AI mı Gerçek mi?) - Faz 2'de eklenecek
+    └── ...                     # Benzer modüler yapı kullanılacak
 ```
 
 ---
