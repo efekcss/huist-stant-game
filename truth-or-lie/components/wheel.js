@@ -7,7 +7,7 @@ const WheelModule = {
     "1. Hediye", "Kazanamadın", 
     "2. Hediye", "Kazanamadın", 
     "3. Hediye", "Kazanamadın", 
-    "4. Hediye", "Kazanamadın", 
+    "4. Hediye", "Kazanamadın",
     "5. Hediye", "Kazanamadın"
   ],
   colors: [
