@@ -5,10 +5,10 @@
 const GAME_CONFIG = {
     QUESTIONS_PER_SESSION: 5,   // Her oyunda sorulacak soru sayısı
     WIN_THRESHOLD: 3,           // Çark çevirmek için gereken minimum doğru sayısı
-    QUESTION_TIMEOUT_SEC: 60,   // Soru başına verilen süre (saniye)
+    QUESTION_TIMEOUT_SEC: 35,   // Soru başına verilen süre (saniye)
     ENABLE_WHEEL: true,         // Çark modülü aktif mi?
-    FEEDBACK_DELAY_MS: 2000,    // Cevap sonrası bekleme süresi (milisaniye)
-    IDLE_TIMEOUT_SEC: 120       // Ekran boşta kalırsa başa dönme süresi (saniye)
+    FEEDBACK_DELAY_MS: 5000,    // Cevap sonrası bekleme süresi (milisaniye)
+    IDLE_TIMEOUT_SEC: 180       // Ekran boşta kalırsa başa dönme süresi (saniye)
 };
 
 const GameApp = {
