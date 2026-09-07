@@ -1,50 +1,98 @@
-# HÜİST Stant Oyunları Teknik Plan ve Yapılanlar
+# HÜİST Stant Oyunları - Kapsamlı Teknik Mimari ve Geliştirici Dokümantasyonu
 
-## 1. Mimari ve Teknik Altyapı Özeti
-
-Proje, internet gereksinimini ortadan kaldırmak için **Çevrimdışı (Offline-first)** ve **SPA (Single Page Application)** mantığı ile Vanilla JS kullanılarak geliştirilmiştir. Dışa bağımlılık veya backend (Node.js/Python vb.) kullanılmamış olup, CORS hatalarını engellemek için veriler saf JavaScript dosyaları halinde tutulmaktadır. 
-
-Kullanılan Teknolojiler:
-* **HTML5:** Kiosk ekran formatına uygun, esnek kutu (flexbox) yerleşimleri.
-* **CSS3:** Kullanıcıların metinleri kazara seçmesini önleyen `user-select: none` özellikleri, dokunmatik yakınlaştırmayı engelleyen `touch-action` kuralları ve donanım hızlandırmalı pürüzsüz geçiş animasyonları.
-* **Vanilla ES6 JavaScript:** Modüler fonksiyonlar, Fisher-Yates karıştırma algoritması, `requestAnimationFrame` veya `setInterval` tabanlı sayaç mekanizmaları.
-
-## 2. Dizin Yapısı ve Dosyaların İşlevleri
-
-Projede şu anda "Truth or Lie" (Gerçek mi Yalan mı?) oyunu kodlanmıştır. İlgili dizin ve dosyaların teknik detayları şu şekildedir:
-
-```text
-/huist-stant-game
-│
-└── /truth-or-lie/
-    ├── index.html       : Uygulamanın giriş noktası. Karşılama, Oyun, Sonuç ve Çark ekranlarını içeren tek sayfalık iskelet.
-    ├── style.css        : Temel stil dosyası. Kiosk korumaları, buton kilitleri, karanlık tema renk paletleri ve temel yerleşimleri içerir.
-    ├── script.js        : Ana oyun motorudur. DOM manipülasyonu, geri sayım yöneticisi, soru yükleme mantığı ve State (Durum) yönetimini yapar. 
-    ├── /data
-    │   └── questions.js : Oyunun sorularının tutulduğu veri havuzudur. JSON yerine 'window.QUESTIONS' adlı global bir dizi kullanılarak tarayıcı güvenlik politikalarına (CORS) takılmadan verilerin yüklenmesi sağlanmıştır.
-    ├── /components
-    │   └── wheel.js     : Tamamen izole edilmiş, canvas veya DOM tabanlı animasyonlu çark sistemidir. Ana oyundan bağımsız çalışabilecek şekilde modüler yazılmıştır.
-    └── /assets          : Gelecek aşamada kullanılacak olan ikon, ses veya arka plan görsellerinin barındırılacağı statik klasör.
-```
-
-## 3. Şu Ana Kadar Gerçekleştirilen Teknik Adımlar
-
-* **Veri Yönetimi:** JSON dosyasındaki 35+ yeni soru parse edilerek `data/questions.js` dosyasına, sisteme uygun yapıya (id, question, isTrue, fact) dönüştürülerek eklendi.
-* **Oyun Motoru ve Durum Yönetimi:** `script.js` dosyasında havuzdan rastgele soru çekme, çift tıklamayı önlemek (debounce/button lock) ve moderatörün (stant görevlisinin) herhangi bir anda oyunu sıfırlayabilmesi mantıkları hedeflendi ve altyapı oluşturuldu.
-* **Çark Modülü Ayrıştırması:** Oyun kazananları için çark mekanizması, ayarlardan (`ENABLE_WHEEL`) tek tuşla açılıp kapatılabilecek şekilde modüler bir bileşen olarak ayrıştırıldı.
-
-## 4. Sıradaki Hedef: Görsel Tasarım ve Arayüz (UI/UX) İyileştirmeleri
-
-Oyunun temel teknik altyapısı ve veri kaynakları tamamlandığına göre sıradaki geliştirme aşaması **Tam Ekran Stant Tasarımı** ve **Çarkın Görsel İyileştirmesidir**. 
-
-Bu adımda yapılacaklar:
-1. `style.css` kullanılarak modern, ilgi çekici (veri bilimi temasına uygun) karanlık/teknolojik bir temanın oluşturulması.
-2. Çark modülünün (`wheel.js` ve CSS bağlantıları) görsel olarak çekici, dönme hissiyatını gerçekçi veren ve dilimleri düzgün hesaplanmış bir arayüze kavuşturulması.
-3. Geçiş efektleri, doğru/yanlış cevaplarda beliren görsel geri bildirimler (yeşil/kırmızı ışıklandırmalar) ve butonların etkileşim durumlarının cilalanması.
-4. Oyun ve sonuç ekranlarındaki hiyerarşinin stant ortamında uzaktan bile rahatça okunabilecek şekilde boyutlandırılması.
+Bu belge, "HÜİST Stant Oyunları" (Truth or Lie & AI mı Gerçek mi?) projesinin sıfırdan inşa edilebilmesi için gereken tüm teknik altyapıyı, mimari kararları, kullanılan teknolojileri ve algoritmik tercihlerin arka planını detaylı bir şekilde açıklamaktadır.
 
 ---
 
-## 5. OYUN 2: "AI mı Değil mi?"
+## 1. Mimari Felsefe ve Temel Tasarım Kararları
 
-Bu aşamada geliştirilecek 2. oyun olan "AI mı Değil mi?" (Is it AI or Real?), yapısal olarak `truth-or-lie` dizinindeki mimarinin neredeyse aynısını (aynı zamanlayıcı, kiosk kilidi, moderatör paneli ve çark bağlantısı) kullanacaktır. Temel farklılık, oyun mekaniğinin soru metinleri yerine görsellerin (yapay zeka tarafından üretilmiş veya gerçek) kullanılması üzerine kurulu olmasıdır.
+Projenin temel kullanım senaryosu, kalabalık bir etkinlik alanında (stantta) kurulacak bir kiosk/tablet ekranıdır. Bu senaryo, mimarinin şekillenmesinde kritik rol oynamıştır.
+
+### 1.1. Neden Backend Yok? (Offline-First Yaklaşımı)
+Etkinlik alanlarında internet bağlantısı genellikle kararsızdır veya güvenlik duvarlarına takılabilir. Oyunun kesintisiz çalışabilmesi için sistem tamamen **Offline-First (Çevrimdışı Öncelikli)** olarak tasarlanmıştır. Herhangi bir Node.js, Python, PHP sunucusuna veya harici bir veritabanına (MongoDB, SQL) ihtiyaç duyulmaz.
+
+### 1.2. Neden Framework Yok? (Vanilla JS Tercihi)
+React, Vue veya Angular gibi modern frameworkler yerine **Saf (Vanilla) ES6 JavaScript** tercih edilmiştir.
+* **Performans ve Hız:** Kısıtlı donanıma sahip olabilecek kiosk cihazlarında, Virtual DOM hesaplamaları (overhead) olmaksızın en yüksek performansı elde etmek.
+* **Bağımlılıkların Azaltılması:** Dış kütüphane bağımlılıklarını sıfıra indirerek bakım maliyetini düşürmek ve projenin yıllar sonra bile "npm install" hataları olmadan sadece bir tarayıcıda çalışabilmesini sağlamak.
+
+### 1.3. Single Page Application (SPA) Tasarımı
+Sayfa yenilenmesi, stant deneyimini bozan (beyaz ekran parlamaları yaratan) bir durumdur. Bu yüzden oyun **SPA (Tek Sayfa Uygulaması)** mantığıyla kurulmuştur. `index.html` üzerinde tüm ekranlar (Menü, Oyun, Sonuç, Çark) birer `<div>` bloğu olarak bulunur ve JavaScript ile class manipülasyonu yapılarak (`display: none` / `display: flex`) geçişler pürüzsüzce sağlanır.
+
+---
+
+## 2. Kullanılan Teknolojiler ve Tercih Nedenleri
+
+### 2.1. Veri Yönetimi ve CORS Çözümü
+Veriler (sorular ve resim adresleri) standart bir `.json` dosyasından `fetch()` API ile çekilmek yerine, `.js` dosyaları içinde global `window` objesine bağlanarak (`window.QUESTIONS = [...]`) tutulmuştur.
+* **Neden?** Lokal dosya sisteminden (`file://` protokolü) çalıştırılan HTML dosyalarında, tarayıcıların güvenlik politikaları (CORS) nedeniyle lokal JSON dosyalarına `fetch` veya `XHR` isteği yapılamaz. Verileri JS objesi olarak DOM yüklenirken entegre etmek, sunucusuz (serverless ve local) çalışmanın en güvenilir yoludur.
+
+### 2.2. CSS3 ve UI/UX Mühendisliği
+* **Kiosk Korumaları:** Kullanıcıların ekrana uzun basıp metinleri seçmesini, sağ tıklamasını veya yanlışlıkla zoom yapmasını engellemek için CSS seviyesinde `user-select: none;`, `-webkit-user-select: none;` ve `touch-action: manipulation;` kuralları uygulanmıştır.
+* **Glassmorphism:** Arayüzde `backdrop-filter: blur(25px);` kullanılarak, arkadaki hareketli "bubble" (baloncuk) yapısının üzerine buzlu cam efekti verilmiş, derinlik hissi artırılmıştır.
+* **Flash Geri Bildirimleri:** Doğru/Yanlış cevaplarda ekranın yeşil/kırmızı yanıp sönmesi JavaScript ile dinamik class eklenerek (`flash-success`, `flash-error`) ve CSS animasyonları ile (box-shadow ve background geçişleri) donanım hızlandırmalı (GPU-accelerated) olarak çözülmüştür.
+
+---
+
+## 3. Ana Oyun Motoru: `GameApp` State Manager
+
+Oyunun tüm mantığı, kapsüllenmiş bir obje olan `GameApp` üzerinden yürütülür. Bu yapı, global scope'u kirletmeden bir State (Durum) makinesi gibi çalışır.
+
+### 3.1. Durum (State) Yönetimi
+```javascript
+state: {
+    questions: [],      // O anki seansın soru dizisi
+    currentIndex: 0,    // Kaçıncı soruda olunduğu
+    score: 0,           // Doğru sayısı
+    timeLeft: 0,        // Kalan süre
+    timerInterval: null,// Geri sayım referansı
+    idleTimeout: null,  // Boşta kalma referansı
+    isLocked: false     // Çift tıklama/spam engelleme kilidi
+}
+```
+* **`isLocked` Bayrağı:** Kullanıcı bir butona bastığında animasyon sürerken diğer butona basıp sistemi çökertmesin veya puanı manipüle etmesin diye devreye girer. İşlem bitene kadar DOM'daki butonları CSS (`pointer-events: none`) ve JS seviyesinde kilitler.
+
+### 3.2. Zamanlayıcılar (Timers)
+* **Geri Sayım (`setInterval`):** Sorular için verilen süre `setInterval` ile her saniye azaltılır ve CSS'teki `timer-bar` genişliği `%` olarak güncellenir. Son 10 saniyede CSS `danger-pulse` animasyonu tetiklenerek kullanıcıda aciliyet hissi (urgency) yaratılır.
+* **Boşta Kalma (Idle) Denetleyicisi (`setTimeout`):** Oyuncu ekran başında oyunu yarım bırakıp giderse diye `idleTimeout` mekanizması kurulmuştur. Ekrana yapılan her dokunuş (`touchstart`, `click`) bu sayacı sıfırlar (`clearTimeout`). Eğer belirtilen süre (örn: 180s) boyunca etkileşim olmazsa oyun otomatik olarak Ana Menüye resetlenir.
+
+---
+
+## 4. Kullanılan Özel Algoritmalar
+
+### 4.1. Fisher-Yates Karıştırma (Shuffle) Algoritması
+Oyun her başladığında 35+ soruluk havuzdan rastgele 5 sorunun seçilmesi gerekmektedir. JS'de yaygın yapılan `array.sort(() => Math.random() - 0.5)` yöntemi, tarayıcı motorlarına (V8, SpiderMonkey) göre düzensiz (biased) sonuçlar ürettiği için tercih edilmemiştir.
+Bunun yerine **O(n) zaman karmaşıklığına** sahip, kusursuz rastgelelik sunan *Fisher-Yates (Knuth) Shuffle* algoritması implemente edilmiştir.
+```javascript
+for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]]; // ES6 Destructuring Assignment
+}
+```
+
+### 4.2. Çark Modülü (`wheel.js`)
+Çark yapısı ana oyundan tamamen bağımsız, modüler (Component) bir yapı olarak tasarlanmıştır. 
+* **HTML5 Canvas:** Çarkın çizimi ve dilimlerin hesaplanması DOM elementleri yerine `Canvas API` (`arc`, `lineTo`, `fill`) kullanılarak milimetrik olarak çizdirilir.
+* **Fizik Simülasyonu:** Çarkın dönme hareketi için CSS `transform: rotate` yerine JavaScript tabanlı sönümlemeli (friction) bir fizik hesaplaması kullanılır. Hız (velocity) rastgele belirlenir ve her frame'de sürtünme katsayısı ile yavaşlatılır, bu sayede hangi ödülde duracağı önceden bilinmez, tamamen tarayıcının rastgelelik motoruna (RNG) bağlı doğal bir fizik hissiyatı verilir.
+
+---
+
+## 5. Proje Dizin Hiyerarşisi
+
+Her oyun (Örn: `truth-or-lie` ve `ai-mi-gercek-mi`) kendi içinde tamamen bağımsız bir ekosisteme sahiptir. Okuyucu 0'dan kurmak isterse şu yapıyı örnek almalıdır:
+
+```text
+/oyun-adi/
+├── index.html        (View: Kiosk Layout ve Containerlar)
+├── style.css         (Design: Glassmorphism, Animations, Kiosk Rules)
+├── script.js         (Controller: GameApp State Machine ve Logic)
+├── /data
+│   └── questions.js  (Model: window.QUESTIONS = [{...}] veri havuzu)
+├── /components
+│   ├── wheel.js      (Bağımsız Çark Canvas Render modülü)
+│   └── confetti.js   (Başarı durumunda tetiklenen partikül motoru)
+└── /assets           (Medya: Görseller, logolar ve sesler)
+```
+
+## 6. Güvenlik ve Moderasyon
+Stant görevlisinin acil durumlarda oyuna müdahale edebilmesi için, UI'da gizlenmiş veya köşeye iliştirilmiş bir **"Moderatör Başa Dön"** butonu (`btnReset`) bulunur. Bu buton tetiklendiğinde `GameApp.resetToMenu()` çalışır; tüm `Interval` ve `Timeout` objeleri Memory Leak (bellek sızıntısı) yaratmamak adına `clearInterval/clearTimeout` ile temizlenir ve State sıfırlanarak oyun başlangıç anına geri döndürülür.
