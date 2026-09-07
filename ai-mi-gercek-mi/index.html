@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HÜİST Stant Oyunları</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <!-- Arka Plan Bubble Yapısı -->
+    <div class="bg-bubbles"></div>
+
+    <!-- Tam Ekran Yanıp Sönme Efekti Kaldırıldı -->
+
+    <!-- Moderatör Reset Butonu -->
+    <button class="mod-reset-btn" id="btnReset" onclick="GameApp.resetToMenu()">🔄 Başa Dön</button>
+
+    <!-- 1. Ana Menü Ekranı -->
+    <div id="screen-menu" class="screen active">
+        <img src="assets/img/huist-logo.png" alt="HÜİST Logo" class="main-logo">
+        <h1><span style="color: #4a148c;">HÜİST</span><span style="color: #E0B0FF;">'e Hoş Geldin!</span></h1>
+        <h2 style="color: #E0B0FF;">AI mı Gerçek mi?</h2>
+        <p style="color: #E0B0FF;">Hangi görselin yapay zeka tarafından üretildiğini bulabilir misin?</p>
+        <button class="btn-primary" onclick="GameApp.startGame()">🚀 Oyuna Başla</button>
+    </div>
+
+    <!-- 2. Oyun Ekranı (AI mı Gerçek mi?) -->
+    <div id="screen-game" class="screen">
+        <div class="timer-text" id="timerText">Kalan Süre: 60s</div>
+        <div class="timer-container">
+            <div class="timer-bar" id="timerBar"></div>
+        </div>
+        
+        <h2 id="questionText" style="margin-bottom: 20px;">Hangisi Yapay Zeka (AI) Tarafından Üretildi?</h2>
+        
+        <div class="image-container">
+            <div class="image-choice" id="choiceA" onclick="GameApp.handleAnswer('A')">
+                <img id="imgA" src="assets/images/placeholder.jpg" alt="Seçenek A">
+            </div>
+            <div class="image-choice" id="choiceB" onclick="GameApp.handleAnswer('B')">
+                <img id="imgB" src="assets/images/placeholder.jpg" alt="Seçenek B">
+            </div>
+        </div>
+
+        <div class="feedback-box" id="feedbackBox">
+            <div id="feedbackContent" style="flex: 1; text-align: left;"></div>
+            <button class="btn-primary" id="btnNextQuestion" style="display:none; font-size: 1.2rem; padding: 15px 25px; margin-left: 20px;" onclick="GameApp.nextQuestion()">Sıradaki Soru ➡️</button>
+        </div>
+    </div>
+
+    <!-- 3. Sonuç Ekranı -->
+    <div id="screen-result" class="screen">
+        <h1 id="resultTitle">Oyun Bitti!</h1>
+        <p id="resultScore">5 üzerinden 3 doğru yaptın.</p>
+        
+        <div id="resultActionContainer" style="margin-top:20px;">
+            <!-- Çark butonu veya yeniden oyna butonu buraya eklenecek -->
+        </div>
+    </div>
+
+    <!-- 4. Çark Ekranı -->
+    <div id="screen-wheel" class="screen">
+        <h1>Ödülünü Belirle!</h1>
+        <div id="wheelContainer">
+            <canvas id="wheelCanvas" width="500" height="500"></canvas>
+        </div>
+        <button class="btn-primary" id="btnSpin" onclick="GameApp.spinWheel()">🎡 Çarkı Çevir</button>
+        <div class="prize-result" id="prizeResult"></div>
+        <button class="btn-primary" id="btnFinish" style="display:none; margin-top:10px;" onclick="GameApp.resetToMenu()">🏠 Ana Menü</button>
+    </div>
+
+    <!-- Script Yüklemeleri (Sıra Önemli) -->
+    <script src="data/images.js"></script>
+    <script src="components/wheel.js"></script>
+    <script src="components/confetti.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
