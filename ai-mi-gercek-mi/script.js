@@ -156,7 +156,7 @@ const GameApp = {
         document.getElementById('timerBar').classList.remove('danger-pulse');
         
         this.triggerFlash('screen-game', 'flash-error');
-        this.showFeedback(false, "Süre Doldu! (Otomatik Yanlış)");
+        this.showFeedback(false);
     },
 
     handleAnswer(userAnswer) {
@@ -182,7 +182,7 @@ const GameApp = {
             this.triggerFlash('screen-game', 'flash-error');
         }
 
-        this.showFeedback(isCorrect, currentQ.fact);
+        this.showFeedback(isCorrect);
     },
 
     triggerFlash(screenId, className) {
@@ -190,14 +190,14 @@ const GameApp = {
         screen.classList.add(className);
     },
 
-    showFeedback(isCorrect, factText) {
+    showFeedback(isCorrect) {
         const feedbackBox = document.getElementById('feedbackBox');
         feedbackBox.classList.add('show');
         
         const title = isCorrect ? "✅ DOĞRU!" : "❌ YANLIŞ!";
         feedbackBox.style.color = isCorrect ? "#2ecc71" : "#e74c3c";
         
-        document.getElementById('feedbackContent').innerHTML = `<strong>${title}</strong><br><span style="color:var(--text-color); font-size:1.1rem; opacity:0.9;">${factText || ''}</span>`;
+        document.getElementById('feedbackContent').innerHTML = `<strong>${title}</strong>`;
         document.getElementById('btnNextQuestion').style.display = 'inline-block';
     },
 
