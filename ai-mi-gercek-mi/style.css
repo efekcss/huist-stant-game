@@ -68,8 +68,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 90%;
-  max-width: 900px;
+  width: 95%;
+  max-width: 1200px;
   text-align: center;
   
   background: var(--glass-bg);
@@ -289,9 +289,9 @@ button:disabled {
 /* AI mı Gerçek mi Görsel Seçenekleri */
 .image-container {
   display: flex;
-  gap: 30px;
+  gap: 50px;
   justify-content: center;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 .image-choice {
   cursor: pointer;
@@ -302,8 +302,8 @@ button:disabled {
   background: rgba(0, 0, 0, 0.3);
 }
 .image-choice img {
-  width: 300px;
-  height: 300px;
+  width: 450px;
+  height: 450px;
   object-fit: cover;
   display: block;
   pointer-events: none;
