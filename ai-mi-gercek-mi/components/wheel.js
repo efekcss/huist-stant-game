@@ -4,8 +4,8 @@
 const WheelModule = {
   canvasId: 'wheelCanvas',
   prizes: [
-    "Not Defteri", "Kazanamadın", 
-    "Kalem", "Kazanamadın", 
+    "Not Defteri",   "Kazanamadın", 
+    "Kalem",         "Kazanamadın", 
     "Avantajı Kartı","Kazanamadın",
     "Anahtarlık"
   ],
