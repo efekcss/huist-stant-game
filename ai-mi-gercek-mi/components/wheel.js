@@ -4,11 +4,10 @@
 const WheelModule = {
   canvasId: 'wheelCanvas',
   prizes: [
-    "1. Hediye", "Kazanamadın", 
-    "2. Hediye", "Kazanamadın", 
-    "3. Hediye", "Kazanamadın", 
-    "4. Hediye", "Kazanamadın",
-    "5. Hediye", "Kazanamadın"
+    "Not Defteri", "Kazanamadın", 
+    "Kalem", "Kazanamadın", 
+    "Avantajı Kartı", "Kazanamadın", 
+    "HMBRGR Ücretsiz Menü", "Kazanamadın",
   ],
   colors: [
     "#2ecc71", "#e74c3c", 
