@@ -13,8 +13,7 @@ const WheelModule = {
     "#2ecc71", "#e74c3c", 
     "#3498db", "#e74c3c", 
     "#9b59b6", "#e74c3c", 
-    "#f1c40f", "#e74c3c", 
-    "#e67e22", "#e74c3c"
+    "#f1c40f", "#e74c3c"
   ],
   isSpinning: false,
   currentAngle: 0,
