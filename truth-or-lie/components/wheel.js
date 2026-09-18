@@ -6,14 +6,12 @@ const WheelModule = {
   prizes: [
     "Not Defteri", "Kazanamadın", 
     "Kalem", "Kazanamadın", 
-    "Avantajı Kartı", "Kazanamadın", 
-    "HMBRGR", "Kazanamadın"
+    "Avantajı Kartı","HMBRGR"
   ],
   colors: [
     "#2ecc71", "#e74c3c", 
     "#3498db", "#e74c3c", 
-    "#9b59b6", "#e74c3c", 
-    "#f1c40f", "#e74c3c"
+    "#9b59b6", "#f1c40f"
   ],
   isSpinning: false,
   currentAngle: 0,
