@@ -7,7 +7,7 @@ const WheelModule = {
     "Not Defteri", "Kazanamadın", 
     "Kalem", "Kazanamadın", 
     "Avantajı Kartı", "Kazanamadın", 
-    "HMBRGR Ücretsiz Menü", "Kazanamadın",
+    "HMBRGR", "Kazanamadın",
   ],
   colors: [
     "#2ecc71", "#e74c3c", 
